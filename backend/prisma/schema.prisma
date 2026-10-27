@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+  ROBOTICS_TEACHER
+  BURSAR
+}
+
+model School {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(150)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  users AppUser[]
+
+  @@map("schools")
+}
+
+model AppUser {
+  id          String  @id @default(uuid()) @db.Uuid
+  schoolId    String  @map("school_id") @db.Uuid
+  firebaseUid String  @unique @map("firebase_uid") @db.VarChar(128)
+  fullName    String  @map("full_name") @db.VarChar(150)
+  email       String  @db.VarChar(254)
+  role        Role
+  isActive    Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  school School @relation(fields: [schoolId], references: [id])
+
+  @@index([schoolId])
+  @@map("app_users")
+}
+
+model SetupStatus {
+  id         String     @id @default(uuid()) @db.Uuid
+  completed  Boolean    @default(false)
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  @@map("setup_status")
+}

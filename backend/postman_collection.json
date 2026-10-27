@@ -1,0 +1,170 @@
+{
+  "info": {
+    "name": "Highglen House School Platform - Stage 1 API",
+    "description": "Postman collection for Stage 1: Authentication and Account Setup",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "setupSecret",
+      "value": "highglen-setup-secret-change-in-production",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "description": "Check if the API is running"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Setup - First Admin",
+      "item": [
+        {
+          "name": "POST First Admin Setup",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/setup/first-admin",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setupSecret\": \"{{setupSecret}}\",\n  \"schoolName\": \"High Glen House School\",\n  \"adminFullName\": \"School Administrator\",\n  \"adminEmail\": \"admin@highglen.school\",\n  \"adminFirebaseUid\": \"firebase-uid-admin-001\"\n}"
+            },
+            "description": "Bootstrap the first admin user. Requires valid SETUP_SECRET. Can only be called once."
+          }
+        },
+        {
+          "name": "POST First Admin Setup (Invalid Secret)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/setup/first-admin",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setupSecret\": \"wrong-secret\",\n  \"schoolName\": \"Test School\",\n  \"adminFullName\": \"Admin User\",\n  \"adminEmail\": \"admin@test.com\",\n  \"adminFirebaseUid\": \"firebase-uid-test\"\n}"
+            },
+            "description": "Test with invalid setup secret - should return 401"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "GET Auth Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "description": "Get current user profile. Requires valid Firebase ID token in Authorization header."
+          }
+        },
+        {
+          "name": "GET Auth Me (No Token)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me",
+            "description": "Test without authorization header - should return 401"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Staff Management",
+      "item": [
+        {
+          "name": "POST Create Staff",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/staff",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Teacher One\",\n  \"email\": \"teacher1@highglen.school\",\n  \"firebaseUid\": \"firebase-uid-teacher-001\",\n  \"role\": \"TEACHER\"\n}"
+            },
+            "description": "Create a new staff member. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "GET List Staff",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/staff",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "description": "List all staff members for the current school. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "PATCH Update Staff",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/admin/staff/{{staffId}}",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"BURSAR\"\n}"
+            },
+            "description": "Update a staff member's role or active status. Requires ADMIN role. Cannot modify your own account."
+          }
+        }
+      ]
+    }
+  ]
+}
